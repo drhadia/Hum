@@ -4,7 +4,7 @@
 <dict>
     <key>CFBundleName</key><string>Hum</string>
     <key>CFBundleDisplayName</key><string>Hum</string>
-    <key>CFBundleIdentifier</key><string>com.hitesh.HomePodBar</string>
+    <key>CFBundleIdentifier</key><string>com.hitesh.Hum</string>
     <key>CFBundleIconFile</key><string>AppIcon</string>
     <key>CFBundleExecutable</key><string>Hum</string>
     <key>CFBundlePackageType</key><string>APPL</string>

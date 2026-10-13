@@ -149,10 +149,8 @@ struct PopoverView: View {
                 RoundIconButton(systemName: "forward.fill", size: 36) { model.play(.next) }
             }
 
-            MutePill(isOn: model.isMuted, tint: model.tint) { model.toggleMute() }
-                .padding(.top, 10)
-                .disabled(!model.isConnected)
-                .opacity(model.isConnected ? 1 : 0.5)
+            // The room the mute pill used to take, so the transport row stays where it was.
+            Color.clear.frame(height: 38)
         }
         .frame(width: 196, height: 262, alignment: .topLeading)
         .animation(.smooth(duration: 0.4), value: model.nowPlaying?.title)
@@ -173,9 +171,18 @@ struct PopoverView: View {
             .minimumScaleFactor(0.7)
 
             VerticalVolumeSlider(value: model.volume, cap: model.volumeCap, tint: model.tint) { model.setVolume($0) }
-                .frame(width: 36, height: 214)
+                .frame(width: 36, height: 176)
                 .disabled(!model.isConnected)
                 .opacity(model.isConnected ? 1 : 0.35)
+
+            RoundIconButton(
+                systemName: model.isMuted ? "speaker.slash.fill" : "speaker.wave.2.fill",
+                size: 34,
+                tint: model.isMuted ? model.tint : .white.opacity(0.75)
+            ) { model.toggleMute() }
+            .help(model.isMuted ? "Unmute" : "Mute")
+            .disabled(!model.isConnected)
+            .opacity(model.isConnected ? 1 : 0.5)
         }
         .frame(width: 44)
         .frame(width: 344, height: 262, alignment: .topTrailing)
@@ -308,32 +315,5 @@ struct PopoverView: View {
             .menuIndicator(.hidden)
             .buttonStyle(PressableStyle(scale: 0.95))
         }
-    }
-}
-
-struct MutePill: View {
-    let isOn: Bool
-    let tint: Color
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            HStack(spacing: 7) {
-                Text("Mute")
-                    .font(.system(size: 10.5, weight: .semibold))
-                    .foregroundStyle(.white.opacity(0.62))
-                ZStack(alignment: isOn ? .trailing : .leading) {
-                    Capsule().fill(isOn ? tint.opacity(0.9) : Color.white.opacity(0.16))
-                    Circle().fill(.white).padding(2)
-                }
-                .frame(width: 24, height: 14)
-                .animation(.spring(response: 0.3, dampingFraction: 0.7), value: isOn)
-            }
-            .padding(.horizontal, 10)
-            .frame(height: 28)
-            .background(Capsule().fill(Color.white.opacity(0.07)))
-            .overlay(Capsule().strokeBorder(Color.white.opacity(0.09)))
-        }
-        .buttonStyle(PressableStyle(scale: 0.95))
     }
 }

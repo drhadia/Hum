@@ -12,6 +12,18 @@ sleep timer and a volume limit, styled after the "AC status bar" reference.
 Click the HomePod icon in the menu bar. First launch asks for Local Network (to find the
 HomePod) and, when Music/Spotify is running, Automation (to show the track).
 
+## Release
+
+```bash
+./package.sh       # universal build, Developer ID signature, DMG, notarization, staple
+```
+
+Needs a "Developer ID Application" certificate in the keychain and a notarytool profile, stored
+once with `xcrun notarytool store-credentials hum-notary --apple-id <apple-id> --team-id <team-id>`
+(the password is an app-specific one from account.apple.com). Bump `CFBundleShortVersionString`
+and `CFBundleVersion` in `Info.plist` for each release. Keep `CFBundleIdentifier` fixed: changing
+it makes every user grant the permissions again.
+
 ## How it works
 
 | Piece | Mechanism |

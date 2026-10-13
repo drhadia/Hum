@@ -119,7 +119,7 @@ struct HomePodArt: View {
         // rings
         let reach = 55 + 70 * look.level
         for i in 0..<3 {
-            let phase = (t * (0.45 + 0.4 * look.level) + Double(i) / 3).truncatingRemainder(dividingBy: 1)
+            let phase = (t * (0.33 + 0.30 * look.level) + Double(i) / 3).truncatingRemainder(dividingBy: 1)
             let d = 98 + reach * phase
             g.stroke(
                 Path(ellipseIn: CGRect(x: -d / 2, y: -d / 2, width: d, height: d)),

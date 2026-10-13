@@ -15,7 +15,7 @@ struct PopoverView: View {
     }
 
     /// Where the pod sits in the main area (its centre), and how big it is.
-    private let podScale: CGFloat = 1.83
+    private let podScale: CGFloat = 1.65
     private let podCenter = CGPoint(x: 212, y: 126)
 
     var body: some View {

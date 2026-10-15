@@ -19,12 +19,14 @@ would turn the other's Accessibility grant stale (still "on" in System Settings,
 ## Release (for other people)
 
 ```bash
-./package.sh       # universal build, Developer ID signed, notarized: build/Hum-<version>.dmg
+./package.sh       # universal build, Developer ID signature, DMG, notarization, staple
 ```
 
-Needs a **Developer ID Application** certificate in the keychain and notarytool credentials saved once:
-`xcrun notarytool store-credentials hum-notary --apple-id <apple id> --team-id <team id>`.
-Bump `CFBundleShortVersionString` / `CFBundleVersion` in `Info.plist` for each release.
+Needs a "Developer ID Application" certificate in the keychain and a notarytool profile, stored
+once with `xcrun notarytool store-credentials hum-notary --apple-id <apple-id> --team-id <team-id>`
+(the password is an app-specific one from account.apple.com). Bump `CFBundleShortVersionString`
+and `CFBundleVersion` in `Info.plist` for each release. Keep `CFBundleIdentifier` fixed: changing
+it makes every user grant the permissions again.
 
 What people are asked for, and when:
 

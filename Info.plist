@@ -12,12 +12,13 @@
     <key>CFBundleVersion</key><string>1</string>
     <key>LSMinimumSystemVersion</key><string>14.0</string>
     <key>LSUIElement</key><true/>
+    <key>NSHumanReadableCopyright</key><string>© 2026 Hitesh Hadiya</string>
     <key>NSHighResolutionCapable</key><true/>
     <key>NSLocalNetworkUsageDescription</key>
     <string>Hum looks for your HomePod on the local network.</string>
     <key>NSBonjourServices</key>
     <array><string>_airplay._tcp</string></array>
     <key>NSAppleEventsUsageDescription</key>
-    <string>Hum shows what Music or Spotify is playing.</string>
+    <string>Hum shows and controls what Music or Spotify is playing.</string>
 </dict>
 </plist>

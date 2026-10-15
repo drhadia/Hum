@@ -23,6 +23,7 @@ struct PopoverView: View {
             header.appear(shown, 0)
             main.padding(.top, 10).appear(shown, 1)
             ClimateStrip(reading: model.climate, emptyCaption: model.climateHint, fahrenheit: model.useFahrenheit) {
+                if model.climate == nil, model.climateEnabled, !model.axTrusted { model.requestAccessibility(); return }
                 withAnimation(.smooth(duration: 0.4)) { model.useFahrenheit.toggle() }
             }
             .padding(.top, 12)
@@ -295,7 +296,7 @@ struct PopoverView: View {
                     if model.axTrusted {
                         Button("Refresh temperature & humidity") { model.refreshClimateNow() }
                     } else {
-                        Button("Grant Accessibility access…") { model.connectClimate() }
+                        Button("Grant Accessibility access…") { model.requestAccessibility() }
                     }
                 }
                 Button(model.useFahrenheit ? "✓ Temperature in °F" : "Temperature in °F") {

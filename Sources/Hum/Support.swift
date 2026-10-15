@@ -67,7 +67,7 @@ struct NowPlaying: Equatable {
 }
 
 enum NowPlayingReader {
-    private static let sources: [(app: String, bundle: String)] = [
+    static let sources: [(app: String, bundle: String)] = [
         ("Music", "com.apple.Music"),
         ("Spotify", "com.spotify.client"),
     ]
@@ -91,6 +91,32 @@ enum NowPlayingReader {
             paused = paused ?? track
         }
         return paused
+    }
+}
+
+// MARK: - Transport (Music / Spotify)
+
+/// Play / pause / skip through the player's own AppleScript. Media keys only work with the Accessibility
+/// permission (macOS silently drops posted keys without it); this needs just the Automation permission
+/// that reading the track already asked for.
+enum PlayerControl {
+    /// false when the app isn't running or the script failed, so the caller can fall back to media keys.
+    static func send(_ command: String, to app: String) -> Bool {
+        guard let source = NowPlayingReader.sources.first(where: { $0.app == app }),
+              ScriptRunner.isRunning(source.bundle) else { return false }
+        return ScriptRunner.run("""
+        tell application "\(source.app)" to \(command)
+        return "ok"
+        """) == "ok"
+    }
+
+    static func command(for key: MediaKey, app: String) -> String {
+        switch key {
+        case .playPause: "playpause"
+        case .next: "next track"
+        // Music's "back track" restarts the song first, like its button and the F7 key.
+        case .previous: app == "Music" ? "back track" : "previous track"
+        }
     }
 }
 
@@ -150,7 +176,9 @@ enum MusicAirPlay {
         guard ScriptRunner.isRunning(bundleID) else { return nil }
         let script = """
         tell application "Music"
-            set d to item 1 of (current AirPlay devices)
+            set ds to current AirPlay devices
+            if ds is {} then return ""
+            set d to item 1 of ds
             return (name of d) & "~" & (sound volume of d)
         end tell
         """

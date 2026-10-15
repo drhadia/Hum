@@ -266,7 +266,31 @@ final class AppModel {
         refresh()
     }
 
-    func play(_ key: MediaKey) { key.press() }
+    func play(_ key: MediaKey) {
+        control(key, askForAccess: true) { PlayerControl.command(for: key, app: $0) }
+    }
+
+    /// "pause" rather than play/pause, so the sleep timer can't start something that already stopped.
+    private func pausePlayback() {
+        control(.playPause, askForAccess: false) { _ in "pause" }
+    }
+
+    /// Music or Spotify get the command directly when the track shown is theirs. Otherwise media keys, which
+    /// reach any app but only work with Accessibility (macOS drops them silently without it); until that is
+    /// granted, whichever of Music or Spotify has a track, and failing that, ask for the permission.
+    private func control(_ key: MediaKey, askForAccess: Bool, command: @escaping @Sendable (String) -> String) {
+        let known = nowPlaying?.app
+        let trusted = HomeAX.isTrusted
+        if known == nil, trusted { key.press(); return }
+        Task.detached(priority: .userInitiated) {
+            let app = known ?? NowPlayingReader.read()?.app
+            let sent = app.map { PlayerControl.send(command($0), to: $0) } ?? false
+            await MainActor.run {
+                if !sent, trusted { key.press() } else if !sent, askForAccess { self.requestAccessibility() }
+                self.readNowPlaying()
+            }
+        }
+    }
 
     // MARK: Sleep timer
 
@@ -289,7 +313,7 @@ final class AppModel {
                 try? await Task.sleep(for: .seconds(1))
             }
             guard let self, !Task.isCancelled else { return }
-            MediaKey.playPause.press()
+            self.pausePlayback()
             try? await Task.sleep(for: .seconds(1))
             if let startVolume { self.setVolume(startVolume) }
             self.sleepRemaining = nil
@@ -315,9 +339,14 @@ final class AppModel {
         climateSource = HomeClimateSource()
     }
 
-    /// Asks for the Accessibility permission the reader needs. Only the user can grant it.
-    func connectClimate() {
-        if !HomeAX.isTrusted { HomeAX.promptForTrust() }
+    /// Asks for Accessibility, which the climate reader and media keys need. Only the user can grant it.
+    /// A grant made for a differently signed copy of Hum (say, an older download) still shows as on in
+    /// System Settings but doesn't count, and then no prompt appears, so open the list too: remove Hum
+    /// there with "−" and turn it on again.
+    func requestAccessibility() {
+        guard !HomeAX.isTrusted else { return }
+        HomeAX.promptForTrust()
+        NSWorkspace.shared.open(URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility")!)
     }
 
     func refreshClimateNow() { (climateSource as? HomeClimateSource)?.refresh() }
